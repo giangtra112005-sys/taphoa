@@ -31,9 +31,6 @@ app.use(cors({
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend static files from 'dist' directory
-app.use(express.static(path.join(__dirname, 'dist')));
-
 // Cấu hình Multer để lưu file
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -58,7 +55,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     console.log('Lỗi: Không tìm thấy file trong yêu cầu.');
     return res.status(400).json({ error: 'Không có file nào được tải lên.' });
   }
-  const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  const imageUrl = `/uploads/${req.file.filename}`;
   console.log('Tải lên thành công:', imageUrl);
   res.json({ imageUrl });
 });
@@ -643,6 +640,9 @@ app.get('/api/seed', (req, res) => {
     }
   });
 });
+
+// Serve frontend static files from 'dist' directory
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Middleware xử lý SPA routing cho Express 5
 app.use((req, res, next) => {
