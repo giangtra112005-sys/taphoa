@@ -29,7 +29,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve frontend static files from 'dist' directory
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Cấu hình Multer để lưu file
 const storage = multer.diskStorage({
@@ -641,9 +641,13 @@ app.get('/api/seed', (req, res) => {
   });
 });
 
-// Catch-all route to serve index.html for SPA
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+// Middleware xử lý SPA routing cho Express 5
+app.use((req, res, next) => {
+  // Nếu không phải API và không phải tệp tin tĩnh (có dấu chấm)
+  if (!req.path.startsWith('/api') && !req.path.includes('.')) {
+    return res.sendFile(path.join(__dirname, 'dist/index.html'));
+  }
+  next();
 });
 
 app.listen(PORT, () => {

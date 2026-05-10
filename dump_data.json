@@ -1,0 +1,233 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Rau củ",
+      "description": "Các loại rau xanh, củ quả",
+      "status": "Hoạt động"
+    },
+    {
+      "id": 2,
+      "name": "Trái cây",
+      "description": "Trái cây tươi",
+      "status": "Hoạt động"
+    },
+    {
+      "id": 3,
+      "name": "thực phẩm",
+      "description": "các loại đồ ăn, uống",
+      "status": "Hoạt động"
+    },
+    {
+      "id": 4,
+      "name": "thịt",
+      "description": "thịt động vật tươi ngon",
+      "status": "Hoạt động"
+    },
+    {
+      "id": 5,
+      "name": "Đồ Gia Dụng",
+      "description": "Đồ Gia Dụng",
+      "status": "Hoạt động"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Rau Muống",
+      "category_id": 1,
+      "price": 15000,
+      "stock": 6,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972748632-570977132.png",
+      "discount": 0,
+      "unit": "Gói"
+    },
+    {
+      "id": 2,
+      "name": "Táo Mỹ",
+      "category_id": 2,
+      "price": 85000,
+      "stock": 9,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972757163-940577344.jpg",
+      "discount": 0,
+      "unit": "Cân"
+    },
+    {
+      "id": 3,
+      "name": "Sữa Vinamilk",
+      "category_id": 3,
+      "price": 40000,
+      "stock": 9,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972909083-461366039.webp",
+      "discount": 0,
+      "unit": "Lốc"
+    },
+    {
+      "id": 4,
+      "name": "Sữa TH",
+      "category_id": 3,
+      "price": 50000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972834323-377859499.jpg",
+      "discount": 0,
+      "unit": "Gói"
+    },
+    {
+      "id": 5,
+      "name": "Cải Bắp",
+      "category_id": 1,
+      "price": 10000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972801066-140102417.jpg",
+      "discount": 0,
+      "unit": "Cái"
+    },
+    {
+      "id": 6,
+      "name": "Quýt Đường",
+      "category_id": 2,
+      "price": 30000,
+      "stock": 9,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972811198-598434721.webp",
+      "discount": 0,
+      "unit": "Cân"
+    },
+    {
+      "id": 7,
+      "name": "Thịt Gà",
+      "category_id": 4,
+      "price": 50000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972822099-806941683.jpg",
+      "discount": 0,
+      "unit": "Cân"
+    },
+    {
+      "id": 8,
+      "name": "Thịt Lợn",
+      "category_id": 4,
+      "price": 40000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777972940722-925551650.jpg",
+      "discount": 0,
+      "unit": "Cân"
+    },
+    {
+      "id": 9,
+      "name": "su hào",
+      "category_id": 1,
+      "price": 5000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777975653155-160847988.jpg",
+      "discount": 0,
+      "unit": "Gói"
+    },
+    {
+      "id": 10,
+      "name": "khoai tây",
+      "category_id": 1,
+      "price": 7000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777975671798-717354980.jpg",
+      "discount": 0,
+      "unit": "Gói"
+    },
+    {
+      "id": 11,
+      "name": "xoài",
+      "category_id": 2,
+      "price": 20000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777975695716-469238985.jpg",
+      "discount": 0,
+      "unit": "Cân"
+    },
+    {
+      "id": 12,
+      "name": "Ostar",
+      "category_id": 3,
+      "price": 10000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777975767476-572107120.jpg",
+      "discount": 0,
+      "unit": "Gói"
+    },
+    {
+      "id": 13,
+      "name": "Việt Quất",
+      "category_id": 2,
+      "price": 110000,
+      "stock": -2459,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1777975807668-723589817.jpg",
+      "discount": 0,
+      "unit": "Cân"
+    },
+    {
+      "id": 14,
+      "name": "Bàn Chải Đánh Răng",
+      "category_id": 5,
+      "price": 10000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1778134370665-237665995.jpg",
+      "discount": 0,
+      "unit": "Cái"
+    },
+    {
+      "id": 16,
+      "name": "Bàn Làm Việc",
+      "category_id": 5,
+      "price": 300000,
+      "stock": 10,
+      "status": "Còn hàng",
+      "image_url": "http://localhost:5000/uploads/1778290762962-595364682.jpg",
+      "discount": 0,
+      "unit": "Cái"
+    }
+  ],
+  "users": [
+    {
+      "id": 2,
+      "name": "admin",
+      "email": "admin@gmail.com",
+      "phone": null,
+      "password": "1234",
+      "role": "Admin",
+      "status": "Hoạt động",
+      "google_id": null
+    },
+    {
+      "id": 3,
+      "name": "yêu tất cả các anh",
+      "email": null,
+      "phone": "0369648742",
+      "password": "1234",
+      "role": "Khách hàng",
+      "status": "Hoạt động",
+      "google_id": null
+    },
+    {
+      "id": 5,
+      "name": "Đào Thị Trà Giang",
+      "email": "giangtra112005@gmail.com",
+      "phone": null,
+      "password": "1234",
+      "role": "Nhân viên",
+      "status": "Hoạt động",
+      "google_id": null
+    }
+  ]
+}
