@@ -9,6 +9,7 @@ const { OAuth2Client } = require('google-auth-library');
 const moment = require('moment');
 const qs = require('qs');
 const crypto = require('crypto');
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const vnp_TmnCode = "N7YJ5E7A";
 const vnp_HashSecret = process.env.VN_HASH_SECRET;
 const vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-const vnp_ReturnUrl = "https://banhangtaphoa.gt.tc/payment-result"; 
+const vnp_ReturnUrl = "https://banhangtaphoa.gt.tc/#/payment-result"; 
 
 // Thay thế bằng Client ID thực tế của bạn
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -28,6 +29,14 @@ app.use(cors({
   origin: ['https://banhangtaphoa.gt.tc', 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true
 }));
+
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -48,16 +57,30 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// API upload ảnh
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  console.log('Nhận yêu cầu tải lên ảnh...');
+// API upload ảnh lên Cloudinary
+app.post('/api/upload', upload.single('image'), async (req, res) => {
+  console.log('Nhận yêu cầu tải lên ảnh lên Cloudinary...');
   if (!req.file) {
     console.log('Lỗi: Không tìm thấy file trong yêu cầu.');
     return res.status(400).json({ error: 'Không có file nào được tải lên.' });
   }
-  const imageUrl = `/uploads/${req.file.filename}`;
-  console.log('Tải lên thành công:', imageUrl);
-  res.json({ imageUrl });
+
+  try {
+    // Tải ảnh lên Cloudinary từ đường dẫn tạm thời của multer
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'products', // Lưu vào thư mục products trên Cloudinary
+    });
+
+    // Xóa file tạm sau khi đã tải lên Cloudinary
+    fs.unlinkSync(req.file.path);
+
+    const imageUrl = result.secure_url;
+    console.log('Tải lên Cloudinary thành công:', imageUrl);
+    res.json({ imageUrl });
+  } catch (error) {
+    console.error('Lỗi khi tải lên Cloudinary:', error);
+    res.status(500).json({ error: 'Lỗi khi tải ảnh lên dịch vụ lưu trữ.' });
+  }
 });
 
 // ================= USERS API =================
