@@ -509,19 +509,6 @@ app.get('/api/vnpay_return', (req, res) => {
           db.run('UPDATE orders SET status = ? WHERE id = ?', ['Hoàn thành', orderId], (err) => {
             if (err) {
               console.error('Error updating order status:', err);
-            } else {
-              // Sau khi cập nhật trạng thái đơn hàng thành công, trừ tồn kho
-              db.all('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [orderId], (err, items) => {
-                if (err) {
-                  console.error('Error fetching order items for stock update:', err);
-                } else {
-                  const updateStockStmt = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
-                  items.forEach(item => {
-                    updateStockStmt.run(item.quantity, item.product_id);
-                  });
-                  updateStockStmt.finalize();
-                }
-              });
             }
           });
           res.json({ code: "00", message: "Success" });
@@ -607,8 +594,8 @@ app.get('/api/stats', (req, res) => {
       // 2.1 Lấy chi phí từ hủy hàng
       db.get("SELECT COALESCE(SUM(cost), 0) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
         if (err) return res.status(500).json({ error: err.message });
-        stats.totalDisposalCost = dispRow.cost || 0;
-        stats.totalRevenue = stats.grossRevenue - stats.totalInventoryCost - stats.totalDisposalCost;
+        stats.totalDisposalCost = Number(dispRow.cost) || 0;
+        stats.totalRevenue = Number(stats.grossRevenue) - Number(stats.totalInventoryCost) - Number(stats.totalDisposalCost);
 
         // 3. Lấy số lượng khách hàng
       db.get("SELECT COUNT(DISTINCT customer_name) as count FROM orders WHERE status != 'Đã hủy'", [], (err, custRow) => {
