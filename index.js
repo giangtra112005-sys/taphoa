@@ -594,22 +594,22 @@ app.get('/api/stats', (req, res) => {
 
   // 1. Lấy doanh thu từ đơn hàng (không tính đơn đã hủy)
   // 1. Lấy doanh thu từ đơn hàng
-  db.get("SELECT COUNT(*) as count, SUM(total) as revenue FROM orders WHERE status != 'Đã hủy'", [], (err, orderRow) => {
+  db.get("SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM orders WHERE status != 'Đã hủy'", [], (err, orderRow) => {
     if (err) return res.status(500).json({ error: err.message });
     
-    stats.totalOrders = parseInt(orderRow.count) || 0;
-    stats.grossRevenue = parseInt(orderRow.revenue) || 0;
+    stats.totalOrders = Number(orderRow.count) || 0;
+    stats.grossRevenue = Number(orderRow.revenue) || 0;
 
     // 2. Lấy chi phí từ nhập hàng
-    db.get("SELECT SUM(total) as cost FROM inventory WHERE status = 'Hoàn thành'", [], (err, invRow) => {
+    db.get("SELECT COALESCE(SUM(total), 0) as cost FROM inventory WHERE status = 'Hoàn thành'", [], (err, invRow) => {
       if (err) return res.status(500).json({ error: err.message });
       
-      stats.totalInventoryCost = parseInt(invRow.cost) || 0;
+      stats.totalInventoryCost = Number(invRow.cost) || 0;
 
       // 2.1 Lấy chi phí từ hủy hàng
-      db.get("SELECT SUM(cost) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
+      db.get("SELECT COALESCE(SUM(cost), 0) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
         if (err) return res.status(500).json({ error: err.message });
-        stats.totalDisposalCost = parseInt(dispRow.cost) || 0;
+        stats.totalDisposalCost = Number(dispRow.cost) || 0;
         stats.totalRevenue = stats.grossRevenue - stats.totalInventoryCost - stats.totalDisposalCost;
 
         // 3. Lấy số lượng khách hàng
