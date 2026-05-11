@@ -592,24 +592,31 @@ app.get('/api/stats', (req, res) => {
     topProducts: []
   };
 
-  // 1. Lấy doanh thu từ đơn hàng (không tính đơn đã hủy)
+  const toSafeNumber = (val) => {
+    if (val === null || val === undefined) return 0;
+    // Chuyển về chuỗi và chỉ giữ lại số và dấu chấm
+    const cleaned = String(val).replace(/[^0-9.]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+
   // 1. Lấy doanh thu từ đơn hàng
   db.get("SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM orders WHERE status != 'Đã hủy'", [], (err, orderRow) => {
     if (err) return res.status(500).json({ error: err.message });
     
-    stats.totalOrders = Number(orderRow.count) || 0;
-    stats.grossRevenue = Number(orderRow.revenue) || 0;
+    stats.totalOrders = toSafeNumber(orderRow.count);
+    stats.grossRevenue = toSafeNumber(orderRow.revenue);
 
     // 2. Lấy chi phí từ nhập hàng
     db.get("SELECT COALESCE(SUM(total), 0) as cost FROM inventory WHERE status = 'Hoàn thành'", [], (err, invRow) => {
       if (err) return res.status(500).json({ error: err.message });
       
-      stats.totalInventoryCost = Number(invRow.cost) || 0;
+      stats.totalInventoryCost = toSafeNumber(invRow.cost);
 
       // 2.1 Lấy chi phí từ hủy hàng
       db.get("SELECT COALESCE(SUM(cost), 0) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
         if (err) return res.status(500).json({ error: err.message });
-        stats.totalDisposalCost = Number(dispRow.cost) || 0;
+        stats.totalDisposalCost = toSafeNumber(dispRow.cost);
         stats.totalRevenue = stats.grossRevenue - stats.totalInventoryCost - stats.totalDisposalCost;
 
         // 3. Lấy số lượng khách hàng
