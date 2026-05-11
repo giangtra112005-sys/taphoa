@@ -506,24 +506,21 @@ app.get('/api/vnpay_return', (req, res) => {
         
         if (responseCode === "00") {
           // Thanh toan thanh cong, cap nhat trang thai don hang
-          db.run('UPDATE orders SET status = ? WHERE id = ?', ['Hoàn thành', orderId], (err) => {
-            if (err) {
-              console.error('Error updating order status:', err);
-            } else {
-              // Sau khi cập nhật trạng thái đơn hàng thành công, trừ tồn kho
-              db.all('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [orderId], (err, items) => {
-                if (err) {
-                  console.error('Error fetching order items for stock update:', err);
-                } else {
-                  const updateStockStmt = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
-                  items.forEach(item => {
-                    // Đảm bảo dùng đúng product_id
-                    const pId = item.product_id || item.id;
-                    if (pId) {
-                      updateStockStmt.run(item.quantity, pId);
+          // Chỉ cập nhật và trừ kho nếu đơn hàng chưa ở trạng thái 'Hoàn thành'
+          db.get('SELECT status FROM orders WHERE id = ?', [orderId], (err, order) => {
+            if (!err && order && order.status !== 'Hoàn thành') {
+              db.run('UPDATE orders SET status = ? WHERE id = ?', ['Hoàn thành', orderId], (err) => {
+                if (!err) {
+                  db.all('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [orderId], (err, items) => {
+                    if (!err && items) {
+                      const updateStockStmt = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
+                      items.forEach(item => {
+                        const pId = item.product_id || item.id;
+                        if (pId) updateStockStmt.run(item.quantity, pId);
+                      });
+                      updateStockStmt.finalize();
                     }
                   });
-                  updateStockStmt.finalize();
                 }
               });
             }
@@ -596,22 +593,23 @@ app.get('/api/stats', (req, res) => {
   };
 
   // 1. Lấy doanh thu từ đơn hàng (không tính đơn đã hủy)
-  db.get("SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM orders WHERE status != 'Đã hủy'", [], (err, orderRow) => {
+  // 1. Lấy doanh thu từ đơn hàng
+  db.get("SELECT COUNT(*) as count, SUM(total) as revenue FROM orders WHERE status != 'Đã hủy'", [], (err, orderRow) => {
     if (err) return res.status(500).json({ error: err.message });
     
-    stats.totalOrders = Number(orderRow.count) || 0;
-    stats.grossRevenue = Number(orderRow.revenue) || 0;
+    stats.totalOrders = parseInt(orderRow.count) || 0;
+    stats.grossRevenue = parseInt(orderRow.revenue) || 0;
 
-    // 2. Lấy chi phí từ nhập hàng (chỉ tính phiếu đã hoàn thành)
-    db.get("SELECT COALESCE(SUM(total), 0) as cost FROM inventory WHERE status = 'Hoàn thành'", [], (err, invRow) => {
+    // 2. Lấy chi phí từ nhập hàng
+    db.get("SELECT SUM(total) as cost FROM inventory WHERE status = 'Hoàn thành'", [], (err, invRow) => {
       if (err) return res.status(500).json({ error: err.message });
       
-      stats.totalInventoryCost = Number(invRow.cost) || 0;
+      stats.totalInventoryCost = parseInt(invRow.cost) || 0;
 
       // 2.1 Lấy chi phí từ hủy hàng
-      db.get("SELECT COALESCE(SUM(cost), 0) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
+      db.get("SELECT SUM(cost) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
         if (err) return res.status(500).json({ error: err.message });
-        stats.totalDisposalCost = Number(dispRow.cost) || 0;
+        stats.totalDisposalCost = parseInt(dispRow.cost) || 0;
         stats.totalRevenue = stats.grossRevenue - stats.totalInventoryCost - stats.totalDisposalCost;
 
         // 3. Lấy số lượng khách hàng
