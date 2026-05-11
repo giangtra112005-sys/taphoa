@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const vnp_TmnCode = "N7YJ5E7A";
 const vnp_HashSecret = process.env.VN_HASH_SECRET;
 const vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-const vnp_ReturnUrl = "https://banhangtaphoa.gt.tc/#/payment-result"; 
+const vnp_ReturnUrl = "https://banhangtaphoa.gt.tc/#/payment-result/"; 
 
 // Thay thế bằng Client ID thực tế của bạn
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
