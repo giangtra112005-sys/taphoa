@@ -381,7 +381,7 @@ app.post('/api/orders', (req, res) => {
           stmt.run(id, item.id, item.name, item.price, item.quantity);
           // Chỉ trừ tồn kho nếu đơn hàng ở trạng thái Hoàn thành
           if ((status || 'Hoàn thành') === 'Hoàn thành') {
-            updateStockStmt.run(item.quantity, item.id);
+            updateStockStmt.run(item.quantity, item.id || item.product_id);
           }
         });
 
@@ -517,7 +517,11 @@ app.get('/api/vnpay_return', (req, res) => {
                 } else {
                   const updateStockStmt = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
                   items.forEach(item => {
-                    updateStockStmt.run(item.quantity, item.product_id);
+                    // Đảm bảo dùng đúng product_id
+                    const pId = item.product_id || item.id;
+                    if (pId) {
+                      updateStockStmt.run(item.quantity, pId);
+                    }
                   });
                   updateStockStmt.finalize();
                 }
@@ -608,7 +612,7 @@ app.get('/api/stats', (req, res) => {
       db.get("SELECT COALESCE(SUM(cost), 0) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
         if (err) return res.status(500).json({ error: err.message });
         stats.totalDisposalCost = Number(dispRow.cost) || 0;
-        stats.totalRevenue = Number(stats.grossRevenue) - Number(stats.totalInventoryCost) - Number(stats.totalDisposalCost);
+        stats.totalRevenue = stats.grossRevenue - stats.totalInventoryCost - stats.totalDisposalCost;
 
         // 3. Lấy số lượng khách hàng
       db.get("SELECT COUNT(DISTINCT customer_name) as count FROM orders WHERE status != 'Đã hủy'", [], (err, custRow) => {
