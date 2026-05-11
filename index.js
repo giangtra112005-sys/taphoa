@@ -604,35 +604,37 @@ app.get('/api/stats', (req, res) => {
   db.get("SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM orders WHERE status != 'Đã hủy'", [], (err, orderRow) => {
     if (err) return res.status(500).json({ error: err.message });
     
-    stats.totalOrders = toSafeNumber(orderRow.count);
-    stats.grossRevenue = toSafeNumber(orderRow.revenue);
+    stats.totalOrders = toSafeNumber(orderRow?.count);
+    stats.grossRevenue = toSafeNumber(orderRow?.revenue);
 
     // 2. Lấy chi phí từ nhập hàng
     db.get("SELECT COALESCE(SUM(total), 0) as cost FROM inventory WHERE status = 'Hoàn thành'", [], (err, invRow) => {
       if (err) return res.status(500).json({ error: err.message });
       
-      stats.totalInventoryCost = toSafeNumber(invRow.cost);
+      stats.totalInventoryCost = toSafeNumber(invRow?.cost);
 
       // 2.1 Lấy chi phí từ hủy hàng
       db.get("SELECT COALESCE(SUM(cost), 0) as cost FROM disposals WHERE type = 'Hủy'", [], (err, dispRow) => {
         if (err) return res.status(500).json({ error: err.message });
-        stats.totalDisposalCost = toSafeNumber(dispRow.cost);
+        
+        stats.totalDisposalCost = toSafeNumber(dispRow?.cost);
         stats.totalRevenue = stats.grossRevenue - stats.totalInventoryCost - stats.totalDisposalCost;
 
         // 3. Lấy số lượng khách hàng
-      db.get("SELECT COUNT(DISTINCT customer_name) as count FROM orders WHERE status != 'Đã hủy'", [], (err, custRow) => {
-        if (err) return res.status(500).json({ error: err.message });
-        stats.totalCustomers = custRow.count || 0;
+        db.get("SELECT COUNT(DISTINCT customer_name) as count FROM orders WHERE status != 'Đã hủy'", [], (err, custRow) => {
+          if (err) return res.status(500).json({ error: err.message });
+          stats.totalCustomers = toSafeNumber(custRow?.count);
 
-        // 4. Thống kê sản phẩm bán chạy
-        db.all(`
-          SELECT oi.product_name, SUM(oi.quantity) as total_sold, oi.price 
-          FROM order_items oi
-          JOIN orders o ON oi.order_id = o.id
-          WHERE o.status != 'Đã hủy'
-          GROUP BY oi.product_id 
-          ORDER BY total_sold DESC
-          LIMIT 5
+          // 4. Sản phẩm bán chạy
+          db.all(`
+            SELECT p.name as product_name, SUM(oi.quantity) as total_sold, p.price 
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status != 'Đã hủy'
+            GROUP BY p.id, p.name, p.price 
+            ORDER BY total_sold DESC
+            LIMIT 5
         `, [], (err, topProducts) => {
           if (err) return res.status(500).json({ error: err.message });
           stats.topProducts = topProducts;
